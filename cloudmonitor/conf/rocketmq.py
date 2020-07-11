@@ -1,0 +1,18 @@
+from oslo_config import cfg
+
+from cloudmonitor._i18n import _
+
+opts = [
+    cfg.StrOpt('nameserver_address',
+               help=_('RocketMQ nameserver address')),
+    cfg.StrOpt('producer_group',
+               help=_('RocketMQ producer group.')),
+    cfg.StrOpt('configure_topic',
+               help=_('RocketMQ configure topic.')),
+    cfg.StrOpt('performance_topic',
+               help=_('RocketMQ performance topic.'))
+]
+
+
+def register_opts():
+    cfg.CONF.register_opts(opts, 'rocketmq')

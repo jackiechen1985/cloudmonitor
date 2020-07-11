@@ -1,0 +1,45 @@
+from cloudmonitor.influx.model_base import *
+
+
+class NatPerformance(ModelBase):
+    LogTime = Column(Index.FIELD)
+    Uuid = Column(Index.TAG)
+    connectNum = Column(Index.FIELD)
+    dataPacketInNum = Column(Index.FIELD)
+    dataPacketOutNum = Column(Index.FIELD)
+    bandwidthIn = Column(Index.FIELD)
+    bandwidthOut = Column(Index.FIELD)
+    dataSource = Column(Index.TAG)
+
+
+class IpsecVpnPerformance(ModelBase):
+    LogTime = Column(Index.FIELD)
+    Uuid = Column(Index.TAG)
+    bandwidthInTotal = Column(Index.FIELD)
+    bandwidthOutTotal = Column(Index.FIELD)
+    dataPacketInNumTotal = Column(Index.FIELD)
+    dataPacketOutNumTotal = Column(Index.FIELD)
+    dataSource = Column(Index.TAG)
+
+
+class VlbPerformance(ModelBase):
+    CREATE_TIME = Column(Index.FIELD)
+    ID = Column(Index.TAG)
+    TRAFFIC_IN = Column(Index.FIELD)
+    TRAFFIC_OUT = Column(Index.FIELD)
+    REQUESTS_TOTAL = Column(Index.FIELD)
+    ACTIVE_CON = Column(Index.FIELD)
+
+
+class ListenerPerformance(ModelBase):
+    CREATE_TIME = Column(Index.FIELD)
+    ID = Column(Index.TAG)
+    TRAFFIC_IN = Column(Index.FIELD)
+    TRAFFIC_OUT = Column(Index.FIELD)
+    REQUESTS_TOTAL = Column(Index.FIELD)
+    ACTIVE_CON = Column(Index.FIELD)
+    ESTAB_CON = Column(Index.FIELD)
+    PACKET_IN = Column(Index.FIELD)
+    PACKET_OUT = Column(Index.FIELD)
+    ABANDON_CON = Column(Index.FIELD)
+    HTTP_QPS = Column(Index.FIELD)
