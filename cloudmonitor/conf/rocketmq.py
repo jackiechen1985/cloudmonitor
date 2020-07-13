@@ -3,7 +3,7 @@ from oslo_config import cfg
 from cloudmonitor._i18n import _
 
 opts = [
-    cfg.StrOpt('nameserver_address',
+    cfg.StrOpt('namesrv_addr',
                help=_('RocketMQ nameserver address')),
     cfg.StrOpt('producer_group',
                help=_('RocketMQ producer group.')),

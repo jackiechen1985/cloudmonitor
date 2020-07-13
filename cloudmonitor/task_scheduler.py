@@ -41,16 +41,17 @@ class TaskScheduler:
                 task['id'] = self._sync_database(task)
                 periodic_task = PeriodicTask(task['interval'], task['initial_delay'], self.run, task)
                 self.process_launcher.launch_service(periodic_task, 1)
-                LOG.info('Start a new task with name: %s, type: %s, interval: %s, initial_delay: %s, module: %s',
-                         task['name'], task['type'], task['interval'], task['initial_delay'], task['module'])
+                LOG.info('Start a new task with type: %s, interval: %s, initial_delay: %s, module: %s', task['type'],
+                         task['interval'], task['initial_delay'], task['module'])
 
         self.process_launcher.wait()
 
     @staticmethod
     def _sync_database(task):
         session = task['context'].session
+        task_name = task['module'].split('.')[-1]
         with session.begin(subtransactions=True):
-            db_task = session.query(models.Task).filter(models.Task.name == task['name']).first()
+            db_task = session.query(models.Task).filter(models.Task.name == task_name).first()
             if db_task:
                 db_task.update({
                     'type': task['type'],
@@ -59,7 +60,7 @@ class TaskScheduler:
                     'module': task['module']
                 })
             else:
-                db_task = models.Task(name=task['name'], type=task['type'], interval=task['interval'],
+                db_task = models.Task(name=task_name, type=task['type'], interval=task['interval'],
                                       initial_delay=task['initial_delay'], module=task['module'])
                 session.add(db_task)
                 session.flush()
@@ -76,7 +77,7 @@ class TaskScheduler:
 
         context = task['context']
         with context.session.begin(subtransactions=True):
-            db_subtask = models.SubTask(start_time=datetime.datetime.now().strftime('%b-%d-%Y %H:%M:%S'),
+            db_subtask = models.SubTask(start_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                         end_time='',
                                         status=models.SubTaskStatus.RUNNING.value,
                                         task_id=task['id'])
@@ -87,15 +88,30 @@ class TaskScheduler:
         try:
             subtask.run(context)
             db_subtask.update({
-                'end_time': datetime.datetime.now().strftime('%b-%d-%Y %H:%M:%S'),
+                'end_time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 'status': models.SubTaskStatus.SUCCESS.value
             })
             context.session.flush()
         except Exception as e:
+            if isinstance(e, Warning):
+                status = models.SubTaskStatus.WARNING.value
+                LOG.warning(e)
+            else:
+                status = models.SubTaskStatus.ERROR.value
+                LOG.error(e)
             db_subtask.update({
-                'end_time': datetime.datetime.now().strftime('%b-%d-%Y %H:%M:%S'),
-                'status': models.SubTaskStatus.ERROR.value,
+                'end_time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'status': status,
                 'description': str(e)
             })
             context.session.flush()
-            LOG.error(e)
+
+
+    @staticmethod
+    def update_subtask_description(session, subtask_id, description):
+        with session.begin(subtransactions=True):
+            db_subtask = session.query(models.SubTask).filter(models.SubTask.id == subtask_id).first()
+            if db_subtask:
+                db_subtask.update({
+                    'description': description
+                })

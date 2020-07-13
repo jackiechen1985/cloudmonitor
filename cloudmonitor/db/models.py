@@ -5,18 +5,17 @@ import sqlalchemy as sa
 from cloudmonitor.db.model_base import BASE
 
 
-# Subtask status
 class SubTaskStatus(Enum):
-    CREATE = 'CREATE'
     RUNNING = 'RUNNING'
     SUCCESS = 'SUCCESS'
     ERROR = 'ERROR'
+    WARNING = 'WARNING'
 
 
-SUBTASK_CREATE = 'CREATE'
-SUBTASK_RUNNING = 'RUNNING'
-SUBTASK_SUCCESS = 'SUCCESS'
-SUBTASK_ERROR = 'ERROR'
+class FtpStatus(Enum):
+    DOWNLOAD_SUCCESS = 'DOWNLOAD_SUCCESS'
+    SEND_SUCCESS = 'SEND_SUCCESS'
+    SEND_ERROR = 'SEND_ERROR'
 
 
 class Task(BASE):
@@ -25,7 +24,7 @@ class Task(BASE):
     type = sa.Column(sa.String(32), nullable=False)
     interval = sa.Column(sa.Integer, nullable=True)
     initial_delay = sa.Column(sa.Integer, nullable=True)
-    module = sa.Column(sa.String(512), nullable=False)
+    module = sa.Column(sa.String(512), nullable=False, unique=True)
 
 
 class SubTask(BASE):
@@ -34,7 +33,7 @@ class SubTask(BASE):
     end_time = sa.Column(sa.String(32), nullable=False)
     status = sa.Column(sa.String(32), nullable=False)
     description = sa.Column(sa.String(512), nullable=True)
-    task_id = sa.Column(sa.Integer, sa.ForeignKey('tasks.id', ondelete="CASCADE"), primary_key=True)
+    task_id = sa.Column(sa.Integer, sa.ForeignKey('tasks.id', ondelete='CASCADE'), primary_key=True)
 
 
 class Ftp(BASE):
@@ -44,4 +43,12 @@ class Ftp(BASE):
     size = sa.Column(sa.BigInteger(), nullable=False)
     mtime = sa.Column(sa.String(32), nullable=False)
     local_file_path = sa.Column(sa.String(255), nullable=False)
-    subtask_id = sa.Column(sa.Integer, sa.ForeignKey('subtasks.id', ondelete="CASCADE"), primary_key=True)
+    status = sa.Column(sa.String(32), nullable=False)
+    subtask_id = sa.Column(sa.Integer, sa.ForeignKey('subtasks.id', ondelete='CASCADE'), primary_key=True)
+
+
+class FtpProducer(BASE):
+    id = sa.Column(sa.Integer, nullable=False, primary_key=True, autoincrement=True)
+    time = sa.Column(sa.String(32), nullable=False)
+    subtask_id = sa.Column(sa.Integer, sa.ForeignKey('subtasks.id', ondelete='CASCADE'), primary_key=True)
+    ftp_id = sa.Column(sa.Integer, sa.ForeignKey('ftps.id', ondelete='CASCADE'), primary_key=True)

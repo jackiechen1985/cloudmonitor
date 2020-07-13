@@ -66,7 +66,8 @@ class FtpClient:
                 LOG.info('Retrieve file (%s) mtime: %s', file, mtime)
 
                 db_ftp = models.Ftp(host=self._host, name=file, size=size, mtime=mtime,
-                                    local_file_path=local_file_path, subtask_id=self._context.subtask_id)
+                                    local_file_path=local_file_path, status=models.FtpStatus.DOWNLOAD_SUCCESS.value,
+                                    subtask_id=self._context.subtask_id)
                 self._context.session.add(db_ftp)
             self._context.session.flush()
 
