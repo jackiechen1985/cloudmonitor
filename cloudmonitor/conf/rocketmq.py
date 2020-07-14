@@ -7,9 +7,9 @@ opts = [
                help=_('RocketMQ nameserver address')),
     cfg.StrOpt('producer_group',
                help=_('RocketMQ producer group.')),
-    cfg.StrOpt('configure_topic',
+    cfg.StrOpt('cm_topic',
                help=_('RocketMQ configure topic.')),
-    cfg.StrOpt('performance_topic',
+    cfg.StrOpt('pm_topic',
                help=_('RocketMQ performance topic.'))
 ]
 

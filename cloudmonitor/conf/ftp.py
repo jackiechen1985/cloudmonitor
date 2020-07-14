@@ -21,7 +21,7 @@ opts = [
                help=_('Remote ipsec directory in ftp server.')),
     cfg.StrOpt('vlb_dir',
                help=_('Remote loadbalancer directory in ftp server.')),
-    cfg.StrOpt('vlistener_dir',
+    cfg.StrOpt('vlb_listener_dir',
                help=_('Remote loadbalancer listener directory in ftp server.'))
 ]
 

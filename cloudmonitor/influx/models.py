@@ -1,7 +1,7 @@
 from cloudmonitor.influx.model_base import *
 
 
-class NatPerformance(ModelBase):
+class NatPm(ModelBase):
     LogTime = Column(Index.FIELD)
     Uuid = Column(Index.TAG)
     connectNum = Column(Index.FIELD)
@@ -12,7 +12,7 @@ class NatPerformance(ModelBase):
     dataSource = Column(Index.TAG)
 
 
-class IpsecVpnPerformance(ModelBase):
+class IpsecVpnPm(ModelBase):
     LogTime = Column(Index.FIELD)
     Uuid = Column(Index.TAG)
     bandwidthInTotal = Column(Index.FIELD)
@@ -22,7 +22,7 @@ class IpsecVpnPerformance(ModelBase):
     dataSource = Column(Index.TAG)
 
 
-class VlbPerformance(ModelBase):
+class VlbPm(ModelBase):
     CREATE_TIME = Column(Index.FIELD)
     ID = Column(Index.TAG)
     TRAFFIC_IN = Column(Index.FIELD)
@@ -31,7 +31,7 @@ class VlbPerformance(ModelBase):
     ACTIVE_CON = Column(Index.FIELD)
 
 
-class ListenerPerformance(ModelBase):
+class VlbListenerPm(ModelBase):
     CREATE_TIME = Column(Index.FIELD)
     ID = Column(Index.TAG)
     TRAFFIC_IN = Column(Index.FIELD)

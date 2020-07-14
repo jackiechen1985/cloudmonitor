@@ -5,14 +5,14 @@ from cloudmonitor.conf import ftp
 from cloudmonitor.subtasks.subtask_base import SubTaskBase
 from cloudmonitor.common.ftp import FtpClient
 from cloudmonitor.common.ftp_parser import FtpParser
-from cloudmonitor.influx.models import IpsecVpnPerformance
+from cloudmonitor.influx.models import VlbPm
 
 LOG = logging.getLogger(__name__)
 
 ftp.register_opts()
 
 
-class IpsecVpnPerfCollector(SubTaskBase):
+class VlbPmCollector(SubTaskBase):
 
     def __init__(self):
         self._context = None
@@ -22,23 +22,21 @@ class IpsecVpnPerfCollector(SubTaskBase):
             for local_file_path in local_file_path_list:
                 records = FtpParser.parse_to_list(local_file_path)
                 for record in records:
-                    db_ipsec_vpn_performance = IpsecVpnPerformance(
-                        LogTime=record[0],
-                        Uuid=record[1],
-                        bandwidthInTotal=record[2],
-                        bandwidthOutTotal=record[3],
-                        dataPacketInNumTotal=record[4],
-                        dataPacketOutNumTotal=record[5],
-                        dataSource=record[6]
+                    db_vlb_pm = VlbPm(
+                        CREATE_TIME=record[0],
+                        ID=record[1],
+                        TRAFFIC_IN=record[2],
+                        TRAFFIC_OUT=record[3],
+                        REQUESTS_TOTAL=record[4]
                     )
-                    self._context.influx_client.write(db_ipsec_vpn_performance)
+                    self._context.influx_client.write(db_vlb_pm)
 
     def run(self, context):
         self._context = context
         ftp_client = FtpClient(context, cfg.CONF.ftp.host, cfg.CONF.ftp.port, cfg.CONF.ftp.connection_timeout,
                                cfg.CONF.ftp.username, cfg.CONF.ftp.password)
         ftp_client.connect()
-        ftp_client.change_remote_dir(cfg.CONF.ftp.ipsec_dir)
+        ftp_client.change_remote_dir(cfg.CONF.ftp.vlb_dir)
         ftp_client.sync_file_to_local_cache()
         local_file_path_list = ftp_client.get_local_file_path_list_by_subtask_id(context.subtask_id)
         if local_file_path_list:

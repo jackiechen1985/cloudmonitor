@@ -2,6 +2,7 @@
 
 import datetime
 import json
+import traceback
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -98,14 +99,13 @@ class TaskScheduler:
                 LOG.warning(e)
             else:
                 status = models.SubTaskStatus.ERROR.value
-                LOG.error(e)
+                LOG.error(traceback.format_exc())
             db_subtask.update({
                 'end_time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 'status': status,
                 'description': str(e)
             })
             context.session.flush()
-
 
     @staticmethod
     def update_subtask_description(session, subtask_id, description):
