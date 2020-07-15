@@ -9,7 +9,7 @@ class SubTaskStatus(Enum):
     RUNNING = 'RUNNING'
     SUCCESS = 'SUCCESS'
     ERROR = 'ERROR'
-    WARNING = 'WARNING'
+    IDLE = 'IDLE'
 
 
 class FtpStatus(Enum):

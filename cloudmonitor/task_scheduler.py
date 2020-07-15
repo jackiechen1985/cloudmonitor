@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import os
 import datetime
 import json
 import traceback
@@ -11,6 +12,7 @@ from oslo_utils import importutils
 
 from cloudmonitor._i18n import _
 from cloudmonitor.conf import task_scheduler as ts
+from cloudmonitor.conf import ha
 from cloudmonitor.task import PeriodicTask
 from cloudmonitor.context import get_context
 from cloudmonitor.db import models
@@ -18,6 +20,9 @@ from cloudmonitor.db import models
 LOG = logging.getLogger(__name__)
 
 ts.register_opts()
+ha.register_opts()
+
+ha_conf_path = '/var/lib/cloudmonitor/ha.json'
 
 
 class TaskScheduler:
@@ -30,7 +35,8 @@ class TaskScheduler:
                 raise Exception(_('No task found'))
             else:
                 LOG.info(_('Found task: %s from %s'), self.tasks, cfg.CONF.task_scheduler.task_conf_path)
-        self.process_launcher = service.ProcessLauncher(cfg.CONF, wait_interval=1.0)
+        self._process_launcher = service.ProcessLauncher(cfg.CONF, wait_interval=1.0)
+        self._is_master = True
 
     def start(self):
         for task in self.tasks:
@@ -41,11 +47,11 @@ class TaskScheduler:
                 task['context'] = get_context()
                 task['id'] = self._sync_database(task)
                 periodic_task = PeriodicTask(task['interval'], task['initial_delay'], self.run, task)
-                self.process_launcher.launch_service(periodic_task, 1)
+                self._process_launcher.launch_service(periodic_task, 1)
                 LOG.info('Start a new task with type: %s, interval: %s, initial_delay: %s, module: %s', task['type'],
                          task['interval'], task['initial_delay'], task['module'])
 
-        self.process_launcher.wait()
+        self._process_launcher.wait()
 
     @staticmethod
     def _sync_database(task):
@@ -68,8 +74,21 @@ class TaskScheduler:
 
         return db_task.id
 
-    @staticmethod
-    def run(task):
+    def run(self, task):
+        # Enter into standby mode if in HA slave state
+        if cfg.CONF.high_availability.enable and os.path.exists(ha_conf_path):
+            with open(ha_conf_path, 'r') as fp:
+                ha = json.loads(fp.read())
+                if not ha['master']:
+                    if self._is_master:
+                        self._is_master = False
+                        LOG.info('Switch to HA slave state')
+                    return
+                else:
+                    if not self._is_master:
+                        self._is_master = True
+                        LOG.info('Switch to HA master state')
+
         subtask_class = importutils.import_class(task['module'])
         subtask = subtask_class()
         if not subtask.run_supported():
@@ -87,31 +106,18 @@ class TaskScheduler:
         context.subtask_id = db_subtask.id
 
         try:
-            subtask.run(context)
-            db_subtask.update({
-                'end_time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                'status': models.SubTaskStatus.SUCCESS.value
-            })
-            context.session.flush()
-        except Exception as e:
-            if isinstance(e, Warning):
-                status = models.SubTaskStatus.WARNING.value
-                LOG.warning(e)
-            else:
-                status = models.SubTaskStatus.ERROR.value
-                LOG.error(traceback.format_exc())
+            status, description = subtask.run(context)
             db_subtask.update({
                 'end_time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 'status': status,
+                'description': description
+            })
+            context.session.flush()
+        except Exception as e:
+            LOG.error(traceback.format_exc())
+            db_subtask.update({
+                'end_time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'status': models.SubTaskStatus.ERROR.value,
                 'description': str(e)
             })
             context.session.flush()
-
-    @staticmethod
-    def update_subtask_description(session, subtask_id, description):
-        with session.begin(subtransactions=True):
-            db_subtask = session.query(models.SubTask).filter(models.SubTask.id == subtask_id).first()
-            if db_subtask:
-                db_subtask.update({
-                    'description': description
-                })

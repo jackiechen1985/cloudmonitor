@@ -7,9 +7,7 @@ opts = [
                 default=False,
                 help=_('Http url for accessing InfluxDB.')),
     cfg.StrOpt('host_ip',
-               help=_('Host ip address.')),
-    cfg.StrOpt('vip',
-               help=_('Virtual ip address for HA.'))
+               help=_('Host ip address.'))
 ]
 
 

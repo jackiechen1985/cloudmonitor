@@ -27,8 +27,8 @@ class VlbListenerPmProducer(SubTaskBase):
                 .join(models.SubTask) \
                 .join(models.Task) \
                 .filter(and_(models.Task.name == VlbListenerPmCollector.__name__,
-                        or_(models.Ftp.status == models.FtpStatus.DOWNLOAD_SUCCESS.value,
-                            models.Ftp.status == models.FtpStatus.SEND_ERROR.value))).all()
+                             or_(models.Ftp.status == models.FtpStatus.DOWNLOAD_SUCCESS.value,
+                                 models.Ftp.status == models.FtpStatus.SEND_ERROR.value))).all()
 
             send_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             timestamp = int(time.mktime(time.strptime(send_time, "%Y-%m-%d %H:%M:%S")))
@@ -55,7 +55,7 @@ class VlbListenerPmProducer(SubTaskBase):
                     instance_list.append(instance)
 
             if not instance_list:
-                raise Warning('No new ftp record found, do nothing!')
+                return models.SubTaskStatus.IDLE.value, None
 
             body = {
                 'transId': f'{cfg.CONF.high_availability.host_ip}-{timestamp}-{util.random_string(8)}',
@@ -78,3 +78,5 @@ class VlbListenerPmProducer(SubTaskBase):
                 })
 
             context.session.flush()
+
+        return models.SubTaskStatus.SUCCESS.value, None

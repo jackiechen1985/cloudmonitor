@@ -5,6 +5,7 @@ from cloudmonitor.conf import ftp
 from cloudmonitor.subtasks.subtask_base import SubTaskBase
 from cloudmonitor.common.ftp import FtpClient
 from cloudmonitor.common.ftp_parser import FtpParser
+from cloudmonitor.db.models import SubTaskStatus
 from cloudmonitor.influx.models import IpsecVpnPm
 
 LOG = logging.getLogger(__name__)
@@ -43,5 +44,7 @@ class IpsecVpnPmCollector(SubTaskBase):
         local_file_path_list = ftp_client.get_local_file_path_list_by_subtask_id(context.subtask_id)
         if local_file_path_list:
             self.save_influx(local_file_path_list)
+            status = SubTaskStatus.SUCCESS.value
         else:
-            raise Warning('No new ftp file found, do nothing!')
+            status = SubTaskStatus.IDLE.value
+        return status, None

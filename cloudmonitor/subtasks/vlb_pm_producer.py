@@ -49,7 +49,7 @@ class VlbPmProducer(SubTaskBase):
                     instance_list.append(instance)
 
             if not instance_list:
-                raise Warning('No new ftp record found, do nothing!')
+                return models.SubTaskStatus.IDLE.value, None
 
             body = {
                 'transId': f'{cfg.CONF.high_availability.host_ip}-{timestamp}-{util.random_string(8)}',
@@ -72,3 +72,5 @@ class VlbPmProducer(SubTaskBase):
                 })
 
             context.session.flush()
+
+        return models.SubTaskStatus.SUCCESS.value, None
