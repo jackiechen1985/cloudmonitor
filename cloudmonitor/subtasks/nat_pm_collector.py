@@ -31,7 +31,8 @@ class NatPmCollector(SubTaskBase):
                         dataPacketOutNum=record[4],
                         bandwidthIn=record[5],
                         bandwidthOut=record[6],
-                        dataSource=record[7]
+                        dataSource=record[7],
+                        subtask_id=self._context.subtask_id
                     )
                     self._context.influx_client.write(db_nat_pm)
 

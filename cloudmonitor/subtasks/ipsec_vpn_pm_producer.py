@@ -1,3 +1,4 @@
+import os
 import datetime
 import time
 import json
@@ -11,6 +12,7 @@ from cloudmonitor.conf import ha
 from cloudmonitor.subtasks.subtask_base import SubTaskBase
 from cloudmonitor.subtasks.ipsec_vpn_pm_collector import IpsecVpnPmCollector
 from cloudmonitor.common.ftp_parser import FtpParser
+from cloudmonitor.influx.models import IpsecVpnPm
 from cloudmonitor.common import util
 from cloudmonitor.db import models
 
@@ -27,8 +29,8 @@ class IpsecVpnPmProducer(SubTaskBase):
                 .join(models.SubTask) \
                 .join(models.Task) \
                 .filter(and_(models.Task.name == IpsecVpnPmCollector.__name__,
-                        or_(models.Ftp.status == models.FtpStatus.DOWNLOAD_SUCCESS.value,
-                            models.Ftp.status == models.FtpStatus.SEND_ERROR.value))).all()
+                             or_(models.Ftp.status == models.FtpStatus.DOWNLOAD_SUCCESS.value,
+                                 models.Ftp.status == models.FtpStatus.SEND_ERROR.value))).all()
 
             send_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             timestamp = int(time.mktime(time.strptime(send_time, "%Y-%m-%d %H:%M:%S")))
@@ -37,18 +39,33 @@ class IpsecVpnPmProducer(SubTaskBase):
                 db_ftp_producer = models.FtpProducer(time=send_time,
                                                      subtask_id=context.subtask_id, ftp_id=ftp.id)
                 context.session.add(db_ftp_producer)
-                records = FtpParser.parse_to_list(ftp.local_file_path)
-                for record in records:
-                    instance = {
-                        'LogTime': record[0],
-                        'Uuid': record[1],
-                        'bandwidthInTotal': record[2],
-                        'bandwidthOutTotal': record[3],
-                        'dataPacketInNumTotal': record[4],
-                        'dataPacketOutNumTotal': record[5],
-                        'dataSource': record[6]
-                    }
-                    instance_list.append(instance)
+
+                if os.path.exists(ftp.local_file_path):
+                    records = FtpParser.parse_to_list(ftp.local_file_path)
+                    for record in records:
+                        instance = {
+                            'LogTime': record[0],
+                            'Uuid': record[1],
+                            'bandwidthInTotal': record[2],
+                            'bandwidthOutTotal': record[3],
+                            'dataPacketInNumTotal': record[4],
+                            'dataPacketOutNumTotal': record[5],
+                            'dataSource': record[6]
+                        }
+                        instance_list.append(instance)
+                else:
+                    records = context.influx_client.query(IpsecVpnPm).filter(f'subtask_id == {ftp.subtask_id}')
+                    for record in records:
+                        instance = {
+                            'LogTime': record['LogTime'],
+                            'Uuid': record['Uuid'],
+                            'bandwidthInTotal': record['bandwidthInTotal'],
+                            'bandwidthOutTotal': record['bandwidthOutTotal'],
+                            'dataPacketInNumTotal': record['dataPacketInNumTotal'],
+                            'dataPacketOutNumTotal': record['dataPacketOutNumTotal'],
+                            'dataSource': record['dataSource']
+                        }
+                        instance_list.append(instance)
 
             if not instance_list:
                 return models.SubTaskStatus.IDLE.value, None

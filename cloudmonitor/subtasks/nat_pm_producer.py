@@ -1,3 +1,4 @@
+import os
 import datetime
 import time
 import json
@@ -11,6 +12,7 @@ from cloudmonitor.conf import ha
 from cloudmonitor.subtasks.subtask_base import SubTaskBase
 from cloudmonitor.subtasks.nat_pm_collector import NatPmCollector
 from cloudmonitor.common.ftp_parser import FtpParser
+from cloudmonitor.influx.models import NatPm
 from cloudmonitor.common import util
 from cloudmonitor.db import models
 
@@ -37,19 +39,35 @@ class NatPmProducer(SubTaskBase):
                 db_ftp_producer = models.FtpProducer(time=send_time,
                                                      subtask_id=context.subtask_id, ftp_id=ftp.id)
                 context.session.add(db_ftp_producer)
-                records = FtpParser.parse_to_list(ftp.local_file_path)
-                for record in records:
-                    instance = {
-                        'LogTime': record[0],
-                        'Uuid': record[1],
-                        'connectNum': record[2],
-                        'dataPacketInNum': record[3],
-                        'dataPacketOutNum': record[4],
-                        'bandwidthIn': record[5],
-                        'bandwidthOut': record[6],
-                        'dataSource': record[7]
-                    }
-                    instance_list.append(instance)
+
+                if os.path.exists(ftp.local_file_path):
+                    records = FtpParser.parse_to_list(ftp.local_file_path)
+                    for record in records:
+                        instance = {
+                            'LogTime': record[0],
+                            'Uuid': record[1],
+                            'connectNum': record[2],
+                            'dataPacketInNum': record[3],
+                            'dataPacketOutNum': record[4],
+                            'bandwidthIn': record[5],
+                            'bandwidthOut': record[6],
+                            'dataSource': record[7]
+                        }
+                        instance_list.append(instance)
+                else:
+                    records = context.influx_client.query(NatPm).filter(f'subtask_id == {ftp.subtask_id}')
+                    for record in records:
+                        instance = {
+                            'LogTime': record['LogTime'],
+                            'Uuid': record['Uuid'],
+                            'connectNum': record['connectNum'],
+                            'dataPacketInNum': record['dataPacketInNum'],
+                            'dataPacketOutNum': record['dataPacketOutNum'],
+                            'bandwidthIn': record['bandwidthIn'],
+                            'bandwidthOut': record['bandwidthOut'],
+                            'dataSource': record['dataSource']
+                        }
+                        instance_list.append(instance)
 
             if not instance_list:
                 return models.SubTaskStatus.IDLE.value, None

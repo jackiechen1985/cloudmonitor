@@ -28,7 +28,8 @@ class VlbPmCollector(SubTaskBase):
                         ID=record[1],
                         TRAFFIC_IN=record[2],
                         TRAFFIC_OUT=record[3],
-                        REQUESTS_TOTAL=record[4]
+                        REQUESTS_TOTAL=record[4],
+                        subtask_id=self._context.subtask_id
                     )
                     self._context.influx_client.write(db_vlb_pm)
 

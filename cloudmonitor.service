@@ -1,0 +1,14 @@
+[Unit]
+Description=CMCC Cloud Monitor
+After=syslog.target network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/cloudmonitor --config-file /etc/cloudmonitor/cloudmonitor.conf --log-file /var/log/cloudmonitor/cloudmonitor.log
+PrivateTmp=true
+KillMode=process
+Restart=on-failure
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target

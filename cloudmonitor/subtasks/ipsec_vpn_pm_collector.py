@@ -30,7 +30,8 @@ class IpsecVpnPmCollector(SubTaskBase):
                         bandwidthOutTotal=record[3],
                         dataPacketInNumTotal=record[4],
                         dataPacketOutNumTotal=record[5],
-                        dataSource=record[6]
+                        dataSource=record[6],
+                        subtask_id=self._context.subtask_id
                     )
                     self._context.influx_client.write(db_ipsec_vpn_pm)
 

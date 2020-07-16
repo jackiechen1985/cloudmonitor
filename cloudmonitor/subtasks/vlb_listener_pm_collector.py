@@ -34,7 +34,8 @@ class VlbListenerPmCollector(SubTaskBase):
                         PACKET_IN=record[7],
                         PACKET_OUT=record[8],
                         ABANDON_CON=record[9],
-                        HTTP_QPS=record[10]
+                        HTTP_QPS=record[10],
+                        subtask_id=self._context.subtask_id
                     )
                     self._context.influx_client.write(db_vlb_listener_pm)
 
