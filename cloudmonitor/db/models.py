@@ -33,6 +33,7 @@ class SubTask(BASE):
     end_time = sa.Column(sa.String(32), nullable=False)
     status = sa.Column(sa.String(32), nullable=False)
     description = sa.Column(sa.String(512), nullable=True)
+    host_ip = sa.Column(sa.String(16), nullable=False)
     task_id = sa.Column(sa.Integer, sa.ForeignKey('tasks.id', ondelete='CASCADE'), primary_key=True)
 
 

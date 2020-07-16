@@ -21,6 +21,7 @@ CREATE TABLE `subtasks` (
     `end_time` varchar(32) NOT NULL,
     `status` varchar(16) NOT NULL,
     `description` varchar(1024) DEFAULT NULL,
+    `host_ip` varchar(16) NOT NULL,
     `task_id` int(10) unsigned NOT NULL,
     PRIMARY KEY (`id`),
     KEY `task_id` (`task_id`),

@@ -22,7 +22,7 @@ LOG = logging.getLogger(__name__)
 ts.register_opts()
 ha.register_opts()
 
-ha_conf_path = '/var/lib/cloudmonitor/ha.json'
+master_path = '/var/lib/cloudmonitor/master'
 
 
 class TaskScheduler:
@@ -76,18 +76,16 @@ class TaskScheduler:
 
     def run(self, task):
         # Enter into standby mode if in HA slave state
-        if cfg.CONF.high_availability.enable and os.path.exists(ha_conf_path):
-            with open(ha_conf_path, 'r') as fp:
-                ha = json.loads(fp.read())
-                if not ha['master']:
-                    if self._is_master:
-                        self._is_master = False
-                        LOG.info('Switch to HA slave state')
-                    return
-                else:
-                    if not self._is_master:
-                        self._is_master = True
-                        LOG.info('Switch to HA master state')
+        if cfg.CONF.high_availability.enable:
+            if os.path.exists(master_path):
+                if not self._is_master:
+                    self._is_master = True
+                    LOG.info('Switch to HA master state')
+            else:
+                if self._is_master:
+                    self._is_master = False
+                    LOG.info('Switch to HA backup state')
+                return
 
         subtask_class = importutils.import_class(task['module'])
         subtask = subtask_class()
@@ -100,6 +98,7 @@ class TaskScheduler:
             db_subtask = models.SubTask(start_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                         end_time='',
                                         status=models.SubTaskStatus.RUNNING.value,
+                                        host_ip=cfg.CONF.high_availability.host_ip,
                                         task_id=task['id'])
             context.session.add(db_subtask)
             context.session.flush()

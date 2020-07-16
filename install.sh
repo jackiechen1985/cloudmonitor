@@ -16,4 +16,4 @@ cp -f task.json /etc/cloudmonitor/
 cp -f cloudmonitor.service /usr/lib/systemd/system/
 
 cp -f keepalived.conf /etc/keepalived/
-cp -f notify.py /etc/keepalived/
+cp -f notify.sh /etc/keepalived/
