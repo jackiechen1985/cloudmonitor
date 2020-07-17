@@ -1,13 +1,17 @@
 import json
+import logging
 
 from oslo_config import cfg
-from oslo_log import log as logging
 
 from rocketmq.client import Producer, Message
 
 from cloudmonitor.conf import rocketmq
 
 LOG = logging.getLogger(__name__)
+formatter = logging.Formatter('%(asctime)s %(process)d %(levelname)s %(name)s [-] %(message)s')
+file_handler = logging.FileHandler("/var/log/cloudmonitor/rocketmq.log")
+file_handler.setFormatter(formatter)
+LOG.addHandler(file_handler)
 
 rocketmq.register_opts()
 
