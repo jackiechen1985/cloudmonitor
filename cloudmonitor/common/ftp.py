@@ -46,10 +46,17 @@ class FtpClient:
     def _check_update_file_list(self):
         file_list = self._client.nlst()
         update_file_list = []
+        latest_ftp = self._context.session.query(models.Ftp).order_by(models.Ftp.id.desc()).first()
         for file in file_list:
             db_ftp = self._context.session.query(models.Ftp).filter(models.Ftp.name == file).first()
             if not db_ftp:
-                update_file_list.append(file)
+                if not latest_ftp:
+                    update_file_list.append(file)
+                else:
+                    t = self._client.sendcmd(f'MDTM {file}').split(' ')[1]
+                    mtime = f'{t[0:4]}-{t[4:6]}-{t[6:8]} {t[8:10]}:{t[10:12]}:{t[12:14]}'
+                    if mtime >= latest_ftp.mtime:
+                        update_file_list.append(file)
         LOG.info('Update file list: %s', update_file_list)
         return update_file_list
 

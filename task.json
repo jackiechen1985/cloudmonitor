@@ -1,6 +1,12 @@
 [
     {
         "type": "periodic",
+        "interval": 3600,
+        "initial_delay": 3600,
+        "module": "cloudmonitor.subtasks.garbage_clean.GarbageClean"
+    },
+    {
+        "type": "periodic",
         "interval": 60,
         "initial_delay": 0,
         "module": "cloudmonitor.subtasks.nat_pm_collector.NatPmCollector"
