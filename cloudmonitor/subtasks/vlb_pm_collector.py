@@ -18,10 +18,10 @@ class VlbPmCollector(SubTaskBase):
     def __init__(self):
         self._context = None
 
-    def save_influx(self, local_file_path_list):
+    def save_influx(self, ftp_list):
         if self._context:
-            for local_file_path in local_file_path_list:
-                records = FtpParser.parse_to_list(local_file_path)
+            for ftp in ftp_list:
+                records = FtpParser.parse_to_list(ftp.local_file_path)
                 for record in records:
                     db_vlb_pm = VlbPm(
                         CREATE_TIME=record[0],
@@ -29,7 +29,7 @@ class VlbPmCollector(SubTaskBase):
                         TRAFFIC_IN=record[2],
                         TRAFFIC_OUT=record[3],
                         REQUESTS_TOTAL=record[4],
-                        subtask_id=self._context.subtask_id
+                        ftp_id=ftp.id
                     )
                     self._context.influx_client.write(db_vlb_pm)
 
@@ -38,11 +38,14 @@ class VlbPmCollector(SubTaskBase):
         ftp_client = FtpClient(context, cfg.CONF.ftp.host, cfg.CONF.ftp.port, cfg.CONF.ftp.connection_timeout,
                                cfg.CONF.ftp.username, cfg.CONF.ftp.password)
         ftp_client.connect()
-        ftp_client.change_remote_dir(cfg.CONF.ftp.vlb_dir)
-        ftp_client.sync_file_to_local_cache()
-        local_file_path_list = ftp_client.get_local_file_path_list_by_subtask_id(context.subtask_id)
-        if local_file_path_list:
-            self.save_influx(local_file_path_list)
+        try:
+            ftp_client.change_remote_dir(cfg.CONF.ftp.vlb_dir)
+            ftp_client.sync_file_to_local_cache()
+        finally:
+            ftp_client.quit()
+        ftp_list = ftp_client.get_ftp_list_by_subtask_id(context.subtask_id)
+        if ftp_list:
+            self.save_influx(ftp_list)
             status = SubTaskStatus.SUCCESS.value
         else:
             status = SubTaskStatus.IDLE.value

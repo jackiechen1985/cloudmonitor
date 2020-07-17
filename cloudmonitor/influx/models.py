@@ -10,7 +10,7 @@ class NatPm(ModelBase):
     bandwidthIn = Column(Index.FIELD)
     bandwidthOut = Column(Index.FIELD)
     dataSource = Column(Index.TAG)
-    subtask_id = Column(Index.TAG)
+    ftp_id = Column(Index.TAG)
 
 
 class IpsecVpnPm(ModelBase):
@@ -21,7 +21,7 @@ class IpsecVpnPm(ModelBase):
     dataPacketInNumTotal = Column(Index.FIELD)
     dataPacketOutNumTotal = Column(Index.FIELD)
     dataSource = Column(Index.TAG)
-    subtask_id = Column(Index.TAG)
+    ftp_id = Column(Index.TAG)
 
 
 class VlbPm(ModelBase):
@@ -31,7 +31,7 @@ class VlbPm(ModelBase):
     TRAFFIC_OUT = Column(Index.FIELD)
     REQUESTS_TOTAL = Column(Index.FIELD)
     ACTIVE_CON = Column(Index.FIELD)
-    subtask_id = Column(Index.TAG)
+    ftp_id = Column(Index.TAG)
 
 
 class VlbListenerPm(ModelBase):
@@ -46,4 +46,4 @@ class VlbListenerPm(ModelBase):
     PACKET_OUT = Column(Index.FIELD)
     ABANDON_CON = Column(Index.FIELD)
     HTTP_QPS = Column(Index.FIELD)
-    subtask_id = Column(Index.TAG)
+    ftp_id = Column(Index.TAG)

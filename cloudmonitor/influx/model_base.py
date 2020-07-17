@@ -49,9 +49,17 @@ class ModelBase:
         return point
 
     @staticmethod
-    def get_tags(cls):
+    def get_all_tags(cls):
         tags = list()
         for (k, v) in cls.__dict__.items():
             if isinstance(v, Column) and v.index == Index.TAG:
                 tags.append(k)
         return tags
+
+    @staticmethod
+    def get_all_fields(cls):
+        fields = list()
+        for (k, v) in cls.__dict__.items():
+            if isinstance(v, Column) and v.index == Index.FIELD:
+                fields.append(k)
+        return fields

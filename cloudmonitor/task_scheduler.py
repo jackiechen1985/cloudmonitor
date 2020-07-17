@@ -75,7 +75,7 @@ class TaskScheduler:
         return db_task.id
 
     def run(self, task):
-        # Enter into standby mode if in HA slave state
+        # Enter into standby mode if in HA backup state
         if cfg.CONF.high_availability.enable:
             if os.path.exists(master_path):
                 if not self._is_master:

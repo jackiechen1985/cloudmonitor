@@ -37,7 +37,19 @@ class QueryObject:
             if obj.get(tag) and obj.get(tag) == value:
                 filter_obj_list.append(obj)
 
-        return filter_obj_list
+        return QueryObject(filter_obj_list)
+
+    def order_by(self, expression):
+        exp_list = expression.split('.')
+        sort = exp_list[-1].strip()
+        if sort == 'asc':
+            reverse = False
+        elif sort == 'desc':
+            reverse = True
+        else:
+            raise Exception(f'sort ({sort}) not support, only asc or desc is allowed')
+        tag = exp_list[-2].strip()
+        self._obj_list.sort(key=lambda x: x[tag], reverse=reverse)
 
 
 class InfluxClient:
@@ -62,24 +74,32 @@ class InfluxClient:
         tables = query_api.query(query=f'from(bucket:"{self._bucket}")'
                                        f' |> range(start: 0, stop: now())'
                                        f' |> filter(fn: (r) => r._measurement == "{model.get_mea(model)}")')
-        query_api.__del__()
-        tags = model.get_tags(model)
+
+        # Find all records count
         obj_list = list()
-        obj = dict()
-        delimeter_field = None
+        influx_record_time_list = list()
         for table in tables:
             for record in table.records:
-                if not delimeter_field:
-                    delimeter_field = record.get_field()
-                if record.get_field() == delimeter_field and obj:
-                    obj_list.append(obj)
+                influx_record_time = record.get_time()
+                if influx_record_time not in influx_record_time_list:
+                    influx_record_time_list.append(influx_record_time)
                     obj = dict()
+                    obj['influx_record_time'] = influx_record_time
+                    obj_list.append(obj)
+
+        tags = model.get_all_tags(model)
+        for table in tables:
+            for record in table.records:
+                obj = obj_list[influx_record_time_list.index(record.get_time())]
                 for tag in tags:
                     if not obj.get(tag):
                         obj[tag] = record.values[tag]
                 obj[record.get_field()] = record.get_value()
-        if obj:
-            obj_list.append(obj)
+
+        # Sort obj_list base on influx timestamp
+        obj_list.sort(key=lambda x: x['influx_record_time'])
+        for obj in obj_list:
+            obj.pop('influx_record_time')
 
         return QueryObject(obj_list)
 

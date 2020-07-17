@@ -37,6 +37,9 @@ class FtpClient:
                  self._host, self._port, self._connection_timeout, self._username, self._password)
         return self._client
 
+    def quit(self):
+        self._client.quit()
+
     def change_remote_dir(self, remote_dir):
         self._client.cwd(remote_dir)
 
@@ -75,9 +78,6 @@ class FtpClient:
         update_file_list = self._check_update_file_list()
         self._retrieve_file_list(update_file_list)
 
-    def get_local_file_path_list_by_subtask_id(self, subtask_id):
-        local_file_path_list = []
+    def get_ftp_list_by_subtask_id(self, subtask_id):
         ftp_list = self._context.session.query(models.Ftp).filter(models.Ftp.subtask_id == subtask_id).all()
-        for ftp in ftp_list:
-            local_file_path_list.append(ftp.local_file_path)
-        return local_file_path_list
+        return ftp_list

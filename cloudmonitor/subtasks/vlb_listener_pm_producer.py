@@ -36,11 +36,10 @@ class VlbListenerPmProducer(SubTaskBase):
             timestamp = int(time.mktime(time.strptime(send_time, "%Y-%m-%d %H:%M:%S")))
             instance_list = []
             for ftp in db_ftp:
-                db_ftp_producer = models.FtpProducer(time=send_time,
-                                                     subtask_id=context.subtask_id, ftp_id=ftp.id)
-                context.session.add(db_ftp_producer)
+                db_ftp_producer = models.FtpProducer(time=send_time, subtask_id=context.subtask_id, ftp_id=ftp.id)
 
                 if os.path.exists(ftp.local_file_path):
+                    db_ftp_producer.data_source = models.FtpProducerDataSource.LOCAL_CACHE.value
                     records = FtpParser.parse_to_list(ftp.local_file_path)
                     for record in records:
                         instance = {
@@ -58,7 +57,8 @@ class VlbListenerPmProducer(SubTaskBase):
                         }
                         instance_list.append(instance)
                 else:
-                    records = context.influx_client.query(VlbListenerPm).filter(f'subtask_id == {ftp.subtask_id}')
+                    db_ftp_producer.data_source = models.FtpProducerDataSource.INFLUXDB.value
+                    records = context.influx_client.query(VlbListenerPm).filter(f'ftp_id == {ftp.id}').all()
                     for record in records:
                         instance = {
                             'CREATE_TIME': record['CREATE_TIME'],
@@ -74,6 +74,8 @@ class VlbListenerPmProducer(SubTaskBase):
                             'HTTP_QPS': record['HTTP_QPS']
                         }
                         instance_list.append(instance)
+
+                context.session.add(db_ftp_producer)
 
             if not instance_list:
                 return models.SubTaskStatus.IDLE.value, None

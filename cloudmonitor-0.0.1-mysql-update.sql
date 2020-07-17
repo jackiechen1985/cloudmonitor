@@ -45,6 +45,7 @@ CREATE TABLE `ftps` (
 CREATE TABLE `ftpproducers` (
     `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
     `time` varchar(32) NOT NULL,
+    `data_source` varchar(32) NOT NULL,
     `subtask_id` int(10) unsigned NOT NULL,
     `ftp_id` int(10) unsigned NOT NULL,
     PRIMARY KEY (`id`),

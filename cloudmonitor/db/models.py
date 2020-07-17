@@ -18,6 +18,11 @@ class FtpStatus(Enum):
     SEND_ERROR = 'SEND_ERROR'
 
 
+class FtpProducerDataSource(Enum):
+    LOCAL_CACHE = 'LOCAL_CACHE'
+    INFLUXDB = 'INFLUXDB'
+
+
 class Task(BASE):
     id = sa.Column(sa.Integer, nullable=False, primary_key=True, autoincrement=True)
     name = sa.Column(sa.String(256), nullable=False, unique=True)
@@ -51,5 +56,6 @@ class Ftp(BASE):
 class FtpProducer(BASE):
     id = sa.Column(sa.Integer, nullable=False, primary_key=True, autoincrement=True)
     time = sa.Column(sa.String(32), nullable=False)
+    data_source = sa.Column(sa.String(32), nullable=False)
     subtask_id = sa.Column(sa.Integer, sa.ForeignKey('subtasks.id', ondelete='CASCADE'), primary_key=True)
     ftp_id = sa.Column(sa.Integer, sa.ForeignKey('ftps.id', ondelete='CASCADE'), primary_key=True)
