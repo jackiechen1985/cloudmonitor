@@ -11,7 +11,7 @@ CREATE TABLE `tasks` (
     `type` varchar(32) NOT NULL,
     `interval` int(10) unsigned DEFAULT NULL,
     `initial_delay` int(10) unsigned DEFAULT NULL,
-    `module` varchar(512) NOT NULL,
+    `module` varchar(4096) NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -19,8 +19,8 @@ CREATE TABLE `subtasks` (
     `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
     `start_time` varchar(32) NOT NULL,
     `end_time` varchar(32) NOT NULL,
-    `status` varchar(16) NOT NULL,
-    `description` varchar(1024) DEFAULT NULL,
+    `status` varchar(32) NOT NULL,
+    `description` varchar(4096) DEFAULT NULL,
     `host_ip` varchar(16) NOT NULL,
     `task_id` int(10) unsigned NOT NULL,
     PRIMARY KEY (`id`),
@@ -34,7 +34,8 @@ CREATE TABLE `ftps` (
     `name` varchar(255) NOT NULL,
     `size` bigint(20) NOT NULL,
     `mtime` varchar(32) DEFAULT NULL,
-    `local_file_path` varchar(1024) NOT NULL,
+    `remote_dir` varchar(4096) NOT NULL,
+    `local_file_path` varchar(4096) NOT NULL,
     `status` varchar(32) NOT NULL,
     `subtask_id` int(10) unsigned NOT NULL,
     PRIMARY KEY (`id`),

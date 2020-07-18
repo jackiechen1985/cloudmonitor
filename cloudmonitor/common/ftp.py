@@ -46,7 +46,8 @@ class FtpClient:
     def _check_update_file_list(self):
         file_list = self._client.nlst()
         update_file_list = []
-        latest_ftp = self._context.session.query(models.Ftp).order_by(models.Ftp.id.desc()).first()
+        latest_ftp = self._context.session.query(models.Ftp).filter(
+            models.Ftp.remote_dir == self._client.pwd()).order_by(models.Ftp.id.desc()).first()
         for file in file_list:
             db_ftp = self._context.session.query(models.Ftp).filter(models.Ftp.name == file).first()
             if not db_ftp:
@@ -55,7 +56,7 @@ class FtpClient:
                 else:
                     t = self._client.sendcmd(f'MDTM {file}').split(' ')[1]
                     mtime = f'{t[0:4]}-{t[4:6]}-{t[6:8]} {t[8:10]}:{t[10:12]}:{t[12:14]}'
-                    if mtime >= latest_ftp.mtime:
+                    if mtime > latest_ftp.mtime:
                         update_file_list.append(file)
         LOG.info('Update file list: %s', update_file_list)
         return update_file_list
@@ -75,7 +76,7 @@ class FtpClient:
                 mtime = f'{t[0:4]}-{t[4:6]}-{t[6:8]} {t[8:10]}:{t[10:12]}:{t[12:14]}'
                 LOG.info('Retrieve file (%s) mtime: %s', file, mtime)
 
-                db_ftp = models.Ftp(host=self._host, name=file, size=size, mtime=mtime,
+                db_ftp = models.Ftp(host=self._host, name=file, size=size, mtime=mtime, remote_dir=self._client.pwd(),
                                     local_file_path=local_file_path, status=models.FtpStatus.DOWNLOAD_SUCCESS.value,
                                     subtask_id=self._context.subtask_id)
                 self._context.session.add(db_ftp)

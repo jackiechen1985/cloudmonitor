@@ -25,11 +25,11 @@ class FtpProducerDataSource(Enum):
 
 class Task(BASE):
     id = sa.Column(sa.Integer, nullable=False, primary_key=True, autoincrement=True)
-    name = sa.Column(sa.String(256), nullable=False, unique=True)
+    name = sa.Column(sa.String(255), nullable=False, unique=True)
     type = sa.Column(sa.String(32), nullable=False)
     interval = sa.Column(sa.Integer, nullable=True)
     initial_delay = sa.Column(sa.Integer, nullable=True)
-    module = sa.Column(sa.String(512), nullable=False, unique=True)
+    module = sa.Column(sa.String(4096), nullable=False, unique=True)
 
 
 class SubTask(BASE):
@@ -37,7 +37,7 @@ class SubTask(BASE):
     start_time = sa.Column(sa.String(32), nullable=False)
     end_time = sa.Column(sa.String(32), nullable=False)
     status = sa.Column(sa.String(32), nullable=False)
-    description = sa.Column(sa.String(512), nullable=True)
+    description = sa.Column(sa.String(4096), nullable=True)
     host_ip = sa.Column(sa.String(16), nullable=False)
     task_id = sa.Column(sa.Integer, sa.ForeignKey('tasks.id', ondelete='CASCADE'), primary_key=True)
 
@@ -48,7 +48,8 @@ class Ftp(BASE):
     name = sa.Column(sa.String(255), nullable=False, unique=True)
     size = sa.Column(sa.BigInteger(), nullable=False)
     mtime = sa.Column(sa.String(32), nullable=False)
-    local_file_path = sa.Column(sa.String(255), nullable=False)
+    remote_dir = sa.Column(sa.String(4096), nullable=False)
+    local_file_path = sa.Column(sa.String(4096), nullable=False)
     status = sa.Column(sa.String(32), nullable=False)
     subtask_id = sa.Column(sa.Integer, sa.ForeignKey('subtasks.id', ondelete='CASCADE'), primary_key=True)
 
