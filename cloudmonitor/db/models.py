@@ -54,6 +54,12 @@ class Ftp(BASE):
     subtask_id = sa.Column(sa.Integer, sa.ForeignKey('subtasks.id', ondelete='CASCADE'), primary_key=True)
 
 
+class FtpRemoteDir(BASE):
+    host = sa.Column(sa.String(16), nullable=False, primary_key=True)
+    remote_dir = sa.Column(sa.String(4096), nullable=False, primary_key=True)
+    mtime = sa.Column(sa.String(32), nullable=False)
+
+
 class FtpProducer(BASE):
     id = sa.Column(sa.Integer, nullable=False, primary_key=True, autoincrement=True)
     time = sa.Column(sa.String(32), nullable=False)

@@ -1,6 +1,7 @@
 use cloudmonitor;
 
 DROP TABLE IF EXISTS `ftpproducers`;
+DROP TABLE IF EXISTS `ftpremotedirs`;
 DROP TABLE IF EXISTS `ftps`;
 DROP TABLE IF EXISTS `subtasks`;
 DROP TABLE IF EXISTS `tasks`;
@@ -11,7 +12,7 @@ CREATE TABLE `tasks` (
     `type` varchar(32) NOT NULL,
     `interval` int(10) unsigned DEFAULT NULL,
     `initial_delay` int(10) unsigned DEFAULT NULL,
-    `module` varchar(4096) NOT NULL,
+    `module` varchar(255) NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -34,13 +35,20 @@ CREATE TABLE `ftps` (
     `name` varchar(255) NOT NULL,
     `size` bigint(20) NOT NULL,
     `mtime` varchar(32) DEFAULT NULL,
-    `remote_dir` varchar(4096) NOT NULL,
-    `local_file_path` varchar(4096) NOT NULL,
+    `remote_dir` varchar(255) NOT NULL,
+    `local_file_path` varchar(255) NOT NULL,
     `status` varchar(32) NOT NULL,
     `subtask_id` int(10) unsigned NOT NULL,
     PRIMARY KEY (`id`),
     KEY `subtask_id` (`subtask_id`),
     FOREIGN KEY (`subtask_id`) REFERENCES `subtasks` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `ftpremotedirs` (
+    `host` varchar(16) NOT NULL,
+    `remote_dir` varchar(255) NOT NULL,
+    `mtime` varchar(32) DEFAULT NULL,
+    PRIMARY KEY (`host`, `remote_dir`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `ftpproducers` (
