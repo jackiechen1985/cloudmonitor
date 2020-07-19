@@ -23,14 +23,44 @@ ha.register_opts()
 
 class NatPmProducer(SubTaskBase):
 
+    def __init__(self):
+        self._context = None
+
+    def send_fragment_msg(self, timestamp, instance_list):
+        fragment_instance_list = list()
+        body = {
+            'transId': f'{cfg.CONF.high_availability.host_ip}-{timestamp}-{util.random_string(8)}',
+            'type': 'NATGateway',
+            'timestamp': timestamp,
+            'instanceList': fragment_instance_list
+        }
+        for instance in instance_list:
+            if len(json.dumps(body)) > self._context.rocketmq_producer.max_message_size:
+                last_instance = fragment_instance_list.pop()
+                self._context.rocketmq_producer.send_sync(self._context.rocketmq_producer.pm_topic, json.dumps(body))
+                fragment_instance_list.clear()
+                fragment_instance_list.append(last_instance)
+                body = {
+                    'transId': f'{cfg.CONF.high_availability.host_ip}-{timestamp}-{util.random_string(8)}',
+                    'type': 'NATGateway',
+                    'timestamp': timestamp,
+                    'instanceList': fragment_instance_list
+                }
+            else:
+                fragment_instance_list.append(instance)
+
+        if fragment_instance_list:
+            self._context.rocketmq_producer.send_sync(self._context.rocketmq_producer.pm_topic, json.dumps(body))
+
     def run(self, context):
+        self._context = context
         with context.session.begin(subtransactions=True):
             db_ftp = context.session.query(models.Ftp) \
                 .join(models.SubTask) \
                 .join(models.Task) \
                 .filter(and_(models.Task.name == NatPmCollector.__name__,
-                        or_(models.Ftp.status == models.FtpStatus.DOWNLOAD_SUCCESS.value,
-                            models.Ftp.status == models.FtpStatus.SEND_ERROR.value))).all()
+                             or_(models.Ftp.status == models.FtpStatus.DOWNLOAD_SUCCESS.value,
+                                 models.Ftp.status == models.FtpStatus.SEND_ERROR.value))).all()
 
             send_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             timestamp = int(time.mktime(time.strptime(send_time, "%Y-%m-%d %H:%M:%S")))
@@ -74,14 +104,8 @@ class NatPmProducer(SubTaskBase):
             if not instance_list:
                 return models.SubTaskStatus.IDLE.value, None
 
-            body = {
-                'transId': f'{cfg.CONF.high_availability.host_ip}-{timestamp}-{util.random_string(8)}',
-                'type': 'NATGateway',
-                'timestamp': timestamp,
-                'instanceList': instance_list
-            }
             try:
-                context.rocketmq_producer.send_sync(context.rocketmq_producer.pm_topic, json.dumps(body))
+                self.send_fragment_msg(timestamp, instance_list)
             except Exception as e:
                 for ftp in db_ftp:
                     ftp.update({

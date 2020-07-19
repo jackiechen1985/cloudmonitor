@@ -30,6 +30,10 @@ class RocketMqProducer:
     def pm_topic(self):
         return cfg.CONF.rocketmq.pm_topic
 
+    @property
+    def max_message_size(self):
+        return cfg.CONF.rocketmq.max_message_size
+
     def send_sync(self, topic, body, keys=None, tags=None):
         self._producer.start()
         msg = Message(topic)
@@ -38,7 +42,7 @@ class RocketMqProducer:
             msg.set_keys(keys)
         if tags:
             msg.set_tags(tags)
-        LOG.info('%s send sync message: topic=%s, keys=%s, tags=%s, body=%s', RocketMqProducer.__name__, topic, keys,
-                 tags, json.dumps(json.loads(body), indent=4, separators=(',', ': ')))
+        LOG.info('%s send sync message: topic=%s, keys=%s, tags=%s, body_size=%s, body=%s', RocketMqProducer.__name__,
+                 topic, keys, tags, len(body), json.dumps(json.loads(body), indent=4, separators=(',', ': ')))
         self._producer.send_sync(msg)
         # self._producer.shutdown()
