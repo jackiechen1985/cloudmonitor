@@ -2,7 +2,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 
 from cloudmonitor.conf import ftp
-from cloudmonitor.subtasks.subtask_base import SubTaskBase
+from cloudmonitor.subtasks.collector import Collector
 from cloudmonitor.common.ftp import FtpClient
 from cloudmonitor.common.ftp_parser import FtpParser
 from cloudmonitor.db.models import SubTaskStatus
@@ -13,10 +13,7 @@ LOG = logging.getLogger(__name__)
 ftp.register_opts()
 
 
-class VlbListenerPmCollector(SubTaskBase):
-
-    def __init__(self):
-        self._context = None
+class VlbListenerPmCollector(Collector):
 
     def save_influx(self, ftp_list):
         if self._context:
@@ -39,9 +36,8 @@ class VlbListenerPmCollector(SubTaskBase):
                     )
                     self._context.influx_client.write(db_vlb_listener_pm)
 
-    def run(self, context):
-        self._context = context
-        ftp_client = FtpClient(context, cfg.CONF.ftp.host, cfg.CONF.ftp.port, cfg.CONF.ftp.connection_timeout,
+    def run(self):
+        ftp_client = FtpClient(self._context, cfg.CONF.ftp.host, cfg.CONF.ftp.port, cfg.CONF.ftp.connection_timeout,
                                cfg.CONF.ftp.username, cfg.CONF.ftp.password)
         ftp_client.connect()
         try:
@@ -49,7 +45,7 @@ class VlbListenerPmCollector(SubTaskBase):
             ftp_client.sync_file_to_local_cache()
         finally:
             ftp_client.quit()
-        ftp_list = ftp_client.get_ftp_list_by_subtask_id(context.subtask_id)
+        ftp_list = ftp_client.get_ftp_list_by_subtask_id(self._context.subtask_id)
         if ftp_list:
             self.save_influx(ftp_list)
             status = SubTaskStatus.SUCCESS.value

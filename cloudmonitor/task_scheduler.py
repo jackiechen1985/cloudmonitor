@@ -87,13 +87,13 @@ class TaskScheduler:
                     LOG.info('Switch to HA backup state')
                 return
 
+        context = task['context']
         subtask_class = importutils.import_class(task['module'])
-        subtask = subtask_class()
+        subtask = subtask_class(context)
         if not subtask.run_supported():
             LOG.error('%s does not implement run method', task['module'])
             raise NotImplementedError()
 
-        context = task['context']
         with context.session.begin(subtransactions=True):
             db_subtask = models.SubTask(start_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                         end_time='',
@@ -105,7 +105,7 @@ class TaskScheduler:
         context.subtask_id = db_subtask.id
 
         try:
-            status, description = subtask.run(context)
+            status, description = subtask.run()
             db_subtask.update({
                 'end_time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 'status': status,
