@@ -19,7 +19,7 @@ rocketmq.register_opts()
 class RocketMqProducer:
 
     def __init__(self):
-        self._producer = Producer(cfg.CONF.rocketmq.producer_group)
+        self._producer = Producer(cfg.CONF.rocketmq.producer_group, max_message_size=self.max_message_size)
         self._producer.set_namesrv_addr(cfg.CONF.rocketmq.namesrv_addr)
 
     @property
@@ -42,7 +42,7 @@ class RocketMqProducer:
             msg.set_keys(keys)
         if tags:
             msg.set_tags(tags)
-        LOG.info('%s send sync message: topic=%s, keys=%s, tags=%s, body_size=%s, body=%s', RocketMqProducer.__name__,
-                 topic, keys, tags, len(body), json.dumps(json.loads(body), indent=4, separators=(',', ': ')))
+        LOG.debug('Send sync message: topic=%s, keys=%s, tags=%s, body_size=%s, body=%s', topic, keys, tags, len(body),
+                  json.dumps(json.loads(body), indent=4, separators=(',', ': ')))
         self._producer.send_sync(msg)
         # self._producer.shutdown()

@@ -1,5 +1,6 @@
+import logging
+
 from oslo_config import cfg
-from oslo_log import log as logging
 from oslo_concurrency import lockutils
 
 from influxdb_client import InfluxDBClient
@@ -8,6 +9,10 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 from cloudmonitor.conf import influx
 
 LOG = logging.getLogger(__name__)
+formatter = logging.Formatter('%(asctime)s %(process)d %(levelname)s %(name)s [-] %(message)s')
+file_handler = logging.FileHandler("/var/log/cloudmonitor/influx.log")
+file_handler.setFormatter(formatter)
+LOG.addHandler(file_handler)
 
 influx.register_opts()
 

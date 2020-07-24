@@ -5,7 +5,6 @@ import json
 
 from sqlalchemy import and_, or_
 
-from oslo_config import cfg
 from oslo_log import log as logging
 
 from cloudmonitor.conf import ha
