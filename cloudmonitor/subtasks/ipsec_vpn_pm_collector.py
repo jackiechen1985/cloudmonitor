@@ -16,21 +16,24 @@ ftp.register_opts()
 class IpsecVpnPmCollector(Collector):
 
     def save_influx(self, ftp_list):
-        if self._context:
-            for ftp in ftp_list:
-                records = FtpParser.parse_to_list(ftp.local_file_path)
-                for record in records:
-                    db_ipsec_vpn_pm = IpsecVpnPm(
-                        LogTime=record[0],
-                        Uuid=record[1],
-                        bandwidthInTotal=record[2],
-                        bandwidthOutTotal=record[3],
-                        dataPacketInNumTotal=record[4],
-                        dataPacketOutNumTotal=record[5],
-                        dataSource=record[6],
-                        ftp_id=ftp.id
-                    )
-                    self._context.influx_client.write(db_ipsec_vpn_pm)
+        model_list = list()
+        for ftp in ftp_list:
+            records = FtpParser.parse_to_list(ftp.local_file_path)
+            for record in records:
+                db_ipsec_vpn_pm = IpsecVpnPm(
+                    LogTime=record[0],
+                    Uuid=record[1],
+                    bandwidthInTotal=record[2],
+                    bandwidthOutTotal=record[3],
+                    dataPacketInNumTotal=record[4],
+                    dataPacketOutNumTotal=record[5],
+                    dataSource=record[6],
+                    ftp_id=ftp.id
+                )
+                model_list.append(db_ipsec_vpn_pm)
+
+        if model_list:
+            self._context.influx_client.write_batch(model_list)
 
     def run(self):
         ftp_client = FtpClient(self._context, cfg.CONF.ftp.host, cfg.CONF.ftp.port, cfg.CONF.ftp.connection_timeout,

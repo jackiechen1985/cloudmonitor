@@ -16,22 +16,25 @@ ftp.register_opts()
 class NatPmCollector(Collector):
 
     def save_influx(self, ftp_list):
-        if self._context:
-            for ftp in ftp_list:
-                records = FtpParser.parse_to_list(ftp.local_file_path)
-                for record in records:
-                    db_nat_pm = NatPm(
-                        LogTime=record[0],
-                        Uuid=record[1],
-                        connectNum=record[2],
-                        dataPacketInNum=record[3],
-                        dataPacketOutNum=record[4],
-                        bandwidthIn=record[5],
-                        bandwidthOut=record[6],
-                        dataSource=record[7],
-                        ftp_id=ftp.id
-                    )
-                    self._context.influx_client.write(db_nat_pm)
+        model_list = list()
+        for ftp in ftp_list:
+            records = FtpParser.parse_to_list(ftp.local_file_path)
+            for record in records:
+                db_nat_pm = NatPm(
+                    LogTime=record[0],
+                    Uuid=record[1],
+                    connectNum=record[2],
+                    dataPacketInNum=record[3],
+                    dataPacketOutNum=record[4],
+                    bandwidthIn=record[5],
+                    bandwidthOut=record[6],
+                    dataSource=record[7],
+                    ftp_id=ftp.id
+                )
+                model_list.append(db_nat_pm)
+
+        if model_list:
+            self._context.influx_client.write_batch(model_list)
 
     def run(self):
         ftp_client = FtpClient(self._context, cfg.CONF.ftp.host, cfg.CONF.ftp.port, cfg.CONF.ftp.connection_timeout,

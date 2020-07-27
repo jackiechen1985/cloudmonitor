@@ -1,8 +1,8 @@
 [
     {
         "type": "periodic",
-        "interval": 3600,
-        "initial_delay": 3600,
+        "interval": 86400,
+        "initial_delay": 86400,
         "module": "cloudmonitor.subtasks.garbage_clean.GarbageClean"
     },
     {
@@ -14,7 +14,7 @@
     {
         "type": "periodic",
         "interval": 300,
-        "initial_delay": 60,
+        "initial_delay": 300,
         "module": "cloudmonitor.subtasks.nat_pm_producer.NatPmProducer"
     },
     {
@@ -26,7 +26,7 @@
     {
         "type": "periodic",
         "interval": 300,
-        "initial_delay": 60,
+        "initial_delay": 300,
         "module": "cloudmonitor.subtasks.ipsec_vpn_pm_producer.IpsecVpnPmProducer"
     },
     {
@@ -38,7 +38,7 @@
     {
         "type": "periodic",
         "interval": 300,
-        "initial_delay": 60,
+        "initial_delay": 300,
         "module": "cloudmonitor.subtasks.vlb_pm_producer.VlbPmProducer"
     },
     {
@@ -50,7 +50,7 @@
     {
         "type": "periodic",
         "interval": 300,
-        "initial_delay": 60,
+        "initial_delay": 300,
         "module": "cloudmonitor.subtasks.vlb_listener_pm_producer.VlbListenerPmProducer"
     }
 ]

@@ -7,7 +7,7 @@ opts = [
     cfg.StrOpt('producer_group', help=_('RocketMQ producer group.')),
     cfg.StrOpt('cm_topic', help=_('RocketMQ configure topic.')),
     cfg.StrOpt('pm_topic', help=_('RocketMQ performance topic.')),
-    cfg.IntOpt('max_message_size', default=131072, help=_('RocketMQ max message size'))
+    cfg.IntOpt('max_message_size', default=4194304, help=_('RocketMQ max message size'))
 ]
 
 

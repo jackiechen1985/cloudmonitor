@@ -36,7 +36,7 @@ class GarbageClean(SubTaskBase):
         # Clean all idle subtask
         subtask_count = self._context.session.query(func.count(models.SubTask.id)).scalar()
         if subtask_count > cfg.CONF.task_scheduler.max_subtask:
-            LOG.info('Total task (%d) exceed max_subtask (%d), Start to clean subtask in %s status',
+            LOG.info('Total task (%d) exceed max_subtask (%d), start to clean subtask in %s status',
                      subtask_count, cfg.CONF.task_scheduler.max_subtask, models.SubTaskStatus.IDLE.value)
             with self._context.session.begin(subtransactions=True):
                 db_subtask = self._context.session.query(models.SubTask).filter(
@@ -50,7 +50,7 @@ class GarbageClean(SubTaskBase):
         # Clean all send sucess subtask
         subtask_count = self._context.session.query(func.count(models.SubTask.id)).scalar()
         if subtask_count > cfg.CONF.task_scheduler.max_subtask:
-            LOG.info('Total task (%d) exceed max_subtask (%d), Start to clean subtask in %s status',
+            LOG.info('Total task (%d) exceed max_subtask (%d), start to clean subtask in %s status',
                      subtask_count, cfg.CONF.task_scheduler.max_subtask, models.SubTaskStatus.SUCCESS.value)
             with self._context.session.begin(subtransactions=True):
                 db_collector_subtask = self._context.session.query(models.SubTask).join(models.Ftp).filter(

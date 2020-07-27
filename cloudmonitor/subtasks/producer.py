@@ -15,33 +15,18 @@ LOG = logging.getLogger(__name__)
 class Producer(SubTaskBase):
 
     def send_fragment_msg(self, type, timestamp, instance_list):
-        LOG.info('Unfragment message body: type=%s, timestamp=%s, instanceList length=%d', type, timestamp,
-                 len(instance_list))
-        fragment_instance_list = list()
         body = {
             'transId': f'{cfg.CONF.high_availability.host_ip}-{timestamp}-{util.random_string(8)}',
             'type': type,
             'timestamp': timestamp,
-            'instanceList': fragment_instance_list
+            'instanceList': instance_list
         }
-        for instance in instance_list:
-            if len(json.dumps(body)) > self._context.rocketmq_producer.max_message_size:
-                last_instance = fragment_instance_list.pop()
-                LOG.info('Fragment message body: transId=%s, type=%s, timestamp=%s, instanceList length=%d',
-                         body['transId'], body['type'], body['timestamp'], len(body['instanceList']))
-                self._context.rocketmq_producer.send_sync(self._context.rocketmq_producer.pm_topic, json.dumps(body))
-                fragment_instance_list.clear()
-                fragment_instance_list.append(last_instance)
-                body = {
-                    'transId': f'{cfg.CONF.high_availability.host_ip}-{timestamp}-{util.random_string(8)}',
-                    'type': type,
-                    'timestamp': timestamp,
-                    'instanceList': fragment_instance_list
-                }
-            else:
-                fragment_instance_list.append(instance)
-
-        if fragment_instance_list:
-            LOG.info('Fragment message body: transId=%s, type=%s, timestamp=%s, instanceList length=%d',
+        body_data = json.dumps(body)
+        if len(json.dumps(body)) < self._context.rocketmq_producer.max_message_size:
+            LOG.info('Fragment message body: transId=%s, type=%s, timestamp=%s, len(instanceList)=%d',
                      body['transId'], body['type'], body['timestamp'], len(body['instanceList']))
-            self._context.rocketmq_producer.send_sync(self._context.rocketmq_producer.pm_topic, json.dumps(body))
+            self._context.rocketmq_producer.send_sync(self._context.rocketmq_producer.pm_topic, body_data)
+        else:
+            delimiter = int(len(instance_list) / 2)
+            self.send_fragment_msg(type, timestamp, instance_list[:delimiter])
+            self.send_fragment_msg(type, timestamp, instance_list[delimiter:])

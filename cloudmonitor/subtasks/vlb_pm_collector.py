@@ -16,19 +16,22 @@ ftp.register_opts()
 class VlbPmCollector(Collector):
 
     def save_influx(self, ftp_list):
-        if self._context:
-            for ftp in ftp_list:
-                records = FtpParser.parse_to_list(ftp.local_file_path)
-                for record in records:
-                    db_vlb_pm = VlbPm(
-                        CREATE_TIME=record[0],
-                        ID=record[1],
-                        TRAFFIC_IN=record[2],
-                        TRAFFIC_OUT=record[3],
-                        REQUESTS_TOTAL=record[4],
-                        ftp_id=ftp.id
-                    )
-                    self._context.influx_client.write(db_vlb_pm)
+        model_list = list()
+        for ftp in ftp_list:
+            records = FtpParser.parse_to_list(ftp.local_file_path)
+            for record in records:
+                db_vlb_pm = VlbPm(
+                    CREATE_TIME=record[0],
+                    ID=record[1],
+                    TRAFFIC_IN=record[2],
+                    TRAFFIC_OUT=record[3],
+                    REQUESTS_TOTAL=record[4],
+                    ftp_id=ftp.id
+                )
+                model_list.append(db_vlb_pm)
+
+        if model_list:
+            self._context.influx_client.write_batch(model_list)
 
     def run(self):
         ftp_client = FtpClient(self._context, cfg.CONF.ftp.host, cfg.CONF.ftp.port, cfg.CONF.ftp.connection_timeout,

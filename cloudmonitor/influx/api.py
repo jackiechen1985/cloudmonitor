@@ -3,7 +3,7 @@ import logging
 from oslo_config import cfg
 from oslo_concurrency import lockutils
 
-from influxdb_client import InfluxDBClient
+from influxdb_client import InfluxDBClient, WriteOptions
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 from cloudmonitor.conf import influx
@@ -73,6 +73,15 @@ class InfluxClient:
 
     def write(self, model):
         self._write(model.convert_to_point())
+
+    def write_batch(self, model_list):
+        write_api = self._client.write_api(
+            write_options=WriteOptions(batch_size=5000, flush_interval=10000, jitter_interval=2000,
+                                       retry_interval=5000))
+        records = [model.convert_to_point() for model in model_list]
+        write_api.write(bucket=self._bucket, record=records)
+        LOG.debug('InfluxDB write batch len(records)=%s to bucket=%s', len(records), self._bucket)
+        write_api.__del__()
 
     def query(self, model):
         query_api = self._client.query_api()
