@@ -40,11 +40,12 @@ class VlbPmProducer(Producer):
                     records = FtpParser.parse_to_list(ftp.local_file_path)
                     for record in records:
                         instance = {
-                            'CREATE_TIME': record[0],
-                            'ID': record[1],
-                            'TRAFFIC_IN': record[2],
-                            'TRAFFIC_OUT': record[3],
-                            'REQUESTS_TOTAL': record[4]
+                            'createTime': record[0],
+                            'uuid': record[1],
+                            'trafficIn': record[2],
+                            'trafficOut': record[3],
+                            'requestsTotal': record[4],
+                            'activeCon': record[5]
                         }
                         instance_list.append(instance)
                 else:
@@ -52,11 +53,12 @@ class VlbPmProducer(Producer):
                     records = self._context.influx_client.query(VlbPm).filter(f'ftp_id == {ftp.id}').all()
                     for record in records:
                         instance = {
-                            'CREATE_TIME': record['CREATE_TIME'],
-                            'ID': record['ID'],
-                            'TRAFFIC_IN': record['TRAFFIC_IN'],
-                            'TRAFFIC_OUT': record['TRAFFIC_OUT'],
-                            'REQUESTS_TOTAL': record['REQUESTS_TOTAL']
+                            'createTime': record['createTime'],
+                            'uuid': record['uuid'],
+                            'trafficIn': record['trafficIn'],
+                            'trafficOut': record['trafficOut'],
+                            'requestsTotal': record['requestsTotal'],
+                            'activeCon': record['activeCon']
                         }
                         instance_list.append(instance)
 

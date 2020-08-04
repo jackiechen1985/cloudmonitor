@@ -21,8 +21,8 @@ class IpsecVpnPmCollector(Collector):
             records = FtpParser.parse_to_list(ftp.local_file_path)
             for record in records:
                 db_ipsec_vpn_pm = IpsecVpnPm(
-                    LogTime=record[0],
-                    Uuid=record[1],
+                    logTime=record[0],
+                    uuid=record[1],
                     bandwidthInTotal=record[2],
                     bandwidthOutTotal=record[3],
                     dataPacketInNumTotal=record[4],

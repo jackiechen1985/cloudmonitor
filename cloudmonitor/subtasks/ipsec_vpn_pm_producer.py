@@ -40,8 +40,8 @@ class IpsecVpnPmProducer(Producer):
                     records = FtpParser.parse_to_list(ftp.local_file_path)
                     for record in records:
                         instance = {
-                            'LogTime': record[0],
-                            'Uuid': record[1],
+                            'logTime': record[0],
+                            'uuid': record[1],
                             'bandwidthInTotal': record[2],
                             'bandwidthOutTotal': record[3],
                             'dataPacketInNumTotal': record[4],
@@ -54,8 +54,8 @@ class IpsecVpnPmProducer(Producer):
                     records = self._context.influx_client.query(IpsecVpnPm).filter(f'ftp_id == {ftp.id}').all()
                     for record in records:
                         instance = {
-                            'LogTime': record['LogTime'],
-                            'Uuid': record['Uuid'],
+                            'logTime': record['logTime'],
+                            'uuid': record['uuid'],
                             'bandwidthInTotal': record['bandwidthInTotal'],
                             'bandwidthOutTotal': record['bandwidthOutTotal'],
                             'dataPacketInNumTotal': record['dataPacketInNumTotal'],

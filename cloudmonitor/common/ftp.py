@@ -11,7 +11,10 @@ LOG = logging.getLogger(__name__)
 
 local_cache_dir = '/var/lib/cloudmonitor/ftp'
 if not os.path.exists(local_cache_dir):
-    os.makedirs(local_cache_dir)
+    try:
+        os.makedirs(local_cache_dir)
+    except Exception as e:
+        LOG.error(e)
 
 
 class FtpClient:

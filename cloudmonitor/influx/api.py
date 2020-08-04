@@ -5,6 +5,7 @@ from oslo_concurrency import lockutils
 
 from influxdb_client import InfluxDBClient, WriteOptions
 from influxdb_client.client.write_api import SYNCHRONOUS
+from influxdb_client.domain.write_precision import WritePrecision
 
 from cloudmonitor.conf import influx
 
@@ -62,12 +63,13 @@ class InfluxClient:
     def __init__(self):
         self._client = InfluxDBClient(url=cfg.CONF.influxdb.url,
                                       token=f'{cfg.CONF.influxdb.username}:{cfg.CONF.influxdb.password}',
+                                      enable_gzip=True,
                                       org=cfg.CONF.influxdb.organization)
         self._bucket = f'{cfg.CONF.influxdb.database}/{cfg.CONF.influxdb.retention_policy}'
 
     def _write(self, record):
         write_api = self._client.write_api(write_options=SYNCHRONOUS)
-        write_api.write(bucket=self._bucket, record=record)
+        write_api.write(bucket=self._bucket, record=record, write_precision=WritePrecision.S)
         LOG.debug('InfluxDB write record=%s to bucket=%s', record, self._bucket)
         write_api.__del__()
 
@@ -79,7 +81,7 @@ class InfluxClient:
             write_options=WriteOptions(batch_size=5000, flush_interval=10000, jitter_interval=2000,
                                        retry_interval=5000))
         records = [model.convert_to_point() for model in model_list]
-        write_api.write(bucket=self._bucket, record=records)
+        write_api.write(bucket=self._bucket, record=records, write_precision=WritePrecision.S)
         LOG.debug('InfluxDB write batch len(records)=%s to bucket=%s', len(records), self._bucket)
         write_api.__del__()
 

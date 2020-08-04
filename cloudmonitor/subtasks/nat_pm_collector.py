@@ -21,8 +21,8 @@ class NatPmCollector(Collector):
             records = FtpParser.parse_to_list(ftp.local_file_path)
             for record in records:
                 db_nat_pm = NatPm(
-                    LogTime=record[0],
-                    Uuid=record[1],
+                    logTime=record[0],
+                    uuid=record[1],
                     connectNum=record[2],
                     dataPacketInNum=record[3],
                     dataPacketOutNum=record[4],

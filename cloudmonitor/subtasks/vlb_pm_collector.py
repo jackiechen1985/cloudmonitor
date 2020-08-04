@@ -21,11 +21,12 @@ class VlbPmCollector(Collector):
             records = FtpParser.parse_to_list(ftp.local_file_path)
             for record in records:
                 db_vlb_pm = VlbPm(
-                    CREATE_TIME=record[0],
-                    ID=record[1],
-                    TRAFFIC_IN=record[2],
-                    TRAFFIC_OUT=record[3],
-                    REQUESTS_TOTAL=record[4],
+                    createTime=record[0],
+                    uuid=record[1],
+                    trafficIn=record[2],
+                    trafficOut=record[3],
+                    requestsTotal=record[4],
+                    activeCon=record[5],
                     ftp_id=ftp.id
                 )
                 model_list.append(db_vlb_pm)

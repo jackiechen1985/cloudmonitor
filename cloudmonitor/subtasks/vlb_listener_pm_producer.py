@@ -41,17 +41,17 @@ class VlbListenerPmProducer(Producer):
                     records = FtpParser.parse_to_list(ftp.local_file_path)
                     for record in records:
                         instance = {
-                            'CREATE_TIME': record[0],
-                            'ID': record[1],
-                            'TRAFFIC_IN': record[2],
-                            'TRAFFIC_OUT': record[3],
-                            'REQUESTS_TOTAL': record[4],
-                            'ACTIVE_CON': record[5],
-                            'ESTAB_CON': record[6],
-                            'PACKET_IN': record[7],
-                            'PACKET_OUT': record[8],
-                            'ABANDON_CON': record[9],
-                            'HTTP_QPS': record[10]
+                            'createTime': record[0],
+                            'uuid': record[1],
+                            'trafficIn': record[2],
+                            'trafficOut': record[3],
+                            'requestsTotal': record[4],
+                            'activeCon': record[5],
+                            'estabCon': record[6],
+                            'packetIn': record[7],
+                            'packetOut': record[8],
+                            'abandonCon': record[9],
+                            'httpQps': record[10]
                         }
                         instance_list.append(instance)
                 else:
@@ -59,17 +59,17 @@ class VlbListenerPmProducer(Producer):
                     records = self._context.influx_client.query(VlbListenerPm).filter(f'ftp_id == {ftp.id}').all()
                     for record in records:
                         instance = {
-                            'CREATE_TIME': record['CREATE_TIME'],
-                            'ID': record['ID'],
-                            'TRAFFIC_IN': record['TRAFFIC_IN'],
-                            'TRAFFIC_OUT': record['TRAFFIC_OUT'],
-                            'REQUESTS_TOTAL': record['REQUESTS_TOTAL'],
-                            'ACTIVE_CON': record['ACTIVE_CON'],
-                            'ESTAB_CON': record['ESTAB_CON'],
-                            'PACKET_IN': record['PACKET_IN'],
-                            'PACKET_OUT': record['PACKET_OUT'],
-                            'ABANDON_CON': record['ABANDON_CON'],
-                            'HTTP_QPS': record['HTTP_QPS']
+                            'createTime': record['createTime'],
+                            'uuid': record['uuid'],
+                            'trafficIn': record['trafficIn'],
+                            'trafficOut': record['trafficOut'],
+                            'requestsTotal': record['requestsTotal'],
+                            'activeCon': record['activeCon'],
+                            'estabCon': record['estabCon'],
+                            'packetIn': record['packetIn'],
+                            'packetOut': record['packetOut'],
+                            'abandonCon': record['abandonCon'],
+                            'httpQps': record['httpQps']
                         }
                         instance_list.append(instance)
 
