@@ -4,8 +4,10 @@ import time
 
 from sqlalchemy import and_, or_
 
+from oslo_config import cfg
 from oslo_log import log as logging
 
+from cloudmonitor import conf
 from cloudmonitor.conf import ha
 from cloudmonitor.subtasks.producer import Producer
 from cloudmonitor.subtasks.vlb_pm_collector import VlbPmCollector
@@ -15,6 +17,7 @@ from cloudmonitor.db import models
 
 LOG = logging.getLogger(__name__)
 
+conf.register_opts()
 ha.register_opts()
 
 
@@ -48,7 +51,7 @@ class VlbPmProducer(Producer):
                             'activeCon': record[5]
                         }
                         instance_list.append(instance)
-                else:
+                elif cfg.CONF.data_source == 'influxdb':
                     db_ftp_producer.data_source = models.FtpProducerDataSource.INFLUXDB.value
                     records = self._context.influx_client.query(VlbPm).filter(f'ftp_id == {ftp.id}').all()
                     for record in records:

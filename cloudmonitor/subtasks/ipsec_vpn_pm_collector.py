@@ -1,6 +1,7 @@
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from cloudmonitor import conf
 from cloudmonitor.conf import ftp
 from cloudmonitor.subtasks.collector import Collector
 from cloudmonitor.common.ftp import FtpClient
@@ -10,6 +11,7 @@ from cloudmonitor.influx.models import IpsecVpnPm
 
 LOG = logging.getLogger(__name__)
 
+conf.register_opts()
 ftp.register_opts()
 
 
@@ -46,7 +48,8 @@ class IpsecVpnPmCollector(Collector):
             ftp_client.quit()
         ftp_list = ftp_client.get_ftp_list_by_subtask_id(self._context.subtask_id)
         if ftp_list:
-            self.save_influx(ftp_list)
+            if cfg.CONF.data_source == 'influxdb':
+                self.save_influx(ftp_list)
             status = SubTaskStatus.SUCCESS.value
         else:
             status = SubTaskStatus.IDLE.value
