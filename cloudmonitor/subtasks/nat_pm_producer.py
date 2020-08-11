@@ -43,14 +43,14 @@ class NatPmProducer(Producer):
                     records = FtpParser.parse_to_list(ftp.local_file_path)
                     for record in records:
                         instance = {
-                            'logTime': record[0],
+                            # 'logTime': record[0],
                             'uuid': record[1],
                             'connectNum': record[2],
                             'dataPacketInNum': record[3],
                             'dataPacketOutNum': record[4],
                             'bandwidthIn': record[5],
                             'bandwidthOut': record[6],
-                            'dataSource': record[7]
+                            # 'dataSource': record[7]
                         }
                         instance_list.append(instance)
                 elif cfg.CONF.data_source == 'influxdb':
@@ -58,14 +58,14 @@ class NatPmProducer(Producer):
                     records = self._context.influx_client.query(NatPm).filter(f'ftp_id == {ftp.id}').all()
                     for record in records:
                         instance = {
-                            'logTime': record['logTime'],
+                            # 'logTime': record['logTime'],
                             'uuid': record['uuid'],
                             'connectNum': record['connectNum'],
                             'dataPacketInNum': record['dataPacketInNum'],
                             'dataPacketOutNum': record['dataPacketOutNum'],
                             'bandwidthIn': record['bandwidthIn'],
                             'bandwidthOut': record['bandwidthOut'],
-                            'dataSource': record['dataSource']
+                            # 'dataSource': record['dataSource']
                         }
                         instance_list.append(instance)
 

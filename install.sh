@@ -18,3 +18,6 @@ cp -f cloudmonitor.service /usr/lib/systemd/system/
 cp -f keepalived.conf /etc/keepalived/
 cp -f health_check.sh /etc/keepalived/
 cp -f notify.sh /etc/keepalived/
+
+systemctl enable keepalived
+systemctl enable cloudmonitor

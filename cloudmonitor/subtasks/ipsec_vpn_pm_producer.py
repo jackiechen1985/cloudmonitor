@@ -43,13 +43,13 @@ class IpsecVpnPmProducer(Producer):
                     records = FtpParser.parse_to_list(ftp.local_file_path)
                     for record in records:
                         instance = {
-                            'logTime': record[0],
+                            # 'logTime': record[0],
                             'uuid': record[1],
                             'bandwidthInTotal': record[2],
                             'bandwidthOutTotal': record[3],
                             'dataPacketInNumTotal': record[4],
                             'dataPacketOutNumTotal': record[5],
-                            'dataSource': record[6]
+                            # 'dataSource': record[6]
                         }
                         instance_list.append(instance)
                 elif cfg.CONF.data_source == 'influxdb':
@@ -57,13 +57,13 @@ class IpsecVpnPmProducer(Producer):
                     records = self._context.influx_client.query(IpsecVpnPm).filter(f'ftp_id == {ftp.id}').all()
                     for record in records:
                         instance = {
-                            'logTime': record['logTime'],
+                            # 'logTime': record['logTime'],
                             'uuid': record['uuid'],
                             'bandwidthInTotal': record['bandwidthInTotal'],
                             'bandwidthOutTotal': record['bandwidthOutTotal'],
                             'dataPacketInNumTotal': record['dataPacketInNumTotal'],
                             'dataPacketOutNumTotal': record['dataPacketOutNumTotal'],
-                            'dataSource': record['dataSource']
+                            # 'dataSource': record['dataSource']
                         }
                         instance_list.append(instance)
 
