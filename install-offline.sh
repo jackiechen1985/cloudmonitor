@@ -1,10 +1,10 @@
 #!/bin/bash
 
-rpm -ivh pkgs/*.rpm
+rpm -Uvh pkgs/cloudmonitor-node/*.rpm --force
 
 mkdir -p ~/.pip
 cp -f pip.conf ~/.pip
-pip3 install --use-wheel --no-index --find-links=pkgs -r requirements.txt
+pip3 install --use-wheel --no-index --find-links=pkgs/cloudmonitor-node -r requirements.txt
 
 python3 setup.py install
 
