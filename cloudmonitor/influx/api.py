@@ -87,8 +87,9 @@ class InfluxClient:
 
     def query(self, model):
         query_api = self._client.query_api()
+        # Only query last half an hour data for high performance
         tables = query_api.query(query=f'from(bucket:"{self._bucket}")'
-                                       f' |> range(start: 0, stop: now())'
+                                       f' |> range(start: -30m)'
                                        f' |> filter(fn: (r) => r._measurement == "{model.get_mea(model)}")')
 
         # Find all records count
